@@ -468,8 +468,8 @@ print(f"[INFO] Initial -3 count:  {n_minus3_init}")
 print(f"[INFO] Initial -7 count:  {n_minus7_init}")
 print(f"[INFO] Initial 0 count:   {n_zero_init}")
 
-# --- Step 2. Replace -3 → NaN ---
-S = soc_raw.replace(-3, np.nan)
+# --- Step 2. Replace -3 → 0 ---
+S = soc_raw.replace(-3, 0)
 
 # Check counts after -3→NaN
 n_nan_after3 = S.isna().sum().sum()
@@ -490,7 +490,7 @@ print(f"[INFO] After replacing -7→0:")
 print(f"       NaN count: {n_nan_after7}, -7 count (should be 0): {n_minus7_final}, 0 count: {n_zero_after7}")
 
 # --- Step 4. Generate categorical variables ---
-valid_vals = [0, 1, 2, 3, 4, 5]
+valid_vals = [1, 2, 3, 4, 5]
 valid_mask = S.isin(valid_vals)            # (n,5): each entry is 0~5 or not
 all_nan    = S.isna().all(axis=1)          # rows where all entries are NaN
 
@@ -505,7 +505,6 @@ for k in valid_vals:
     varname = f"social_act_2_cat{k}"
     globals()[varname] = soc_out[varname]
 
-print('Social act category 0:', social_act_2_cat0.value_counts(dropna=False))
 print('Social act category 1:', social_act_2_cat1.value_counts(dropna=False))
 print('Social act category 2:', social_act_2_cat2.value_counts(dropna=False))
 print('Social act category 3:', social_act_2_cat3.value_counts(dropna=False))
@@ -685,7 +684,7 @@ print(f"Average missing rate across cortical thickness columns: {nan_ratio:.2%}"
 # 1: sport, 2: pub, 3: religious, 4: education, 5: other
 all_vars = [eid, visit_yr_2, gender, age_2, ethnicity_0, marital_2,        # Demographic
             ed_yr_2, emp_2, income_fam_2, fncl_sat_2, hthcare_2,           # Socioeconomic
-            lone_2, social_act_n_2, social_act_2_cat0, social_act_2_cat1,  # Network
+            lone_2, social_act_n_2, social_act_2_cat1,  # Network
             social_act_2_cat2, social_act_2_cat3, social_act_2_cat4,       # Network
             social_act_2_cat5,                                             # Network
             freq_visit_2, confide_2, fam_sat_2, frnd_sat_2, N_fam_2,       # Network
@@ -697,7 +696,7 @@ all_vars = [eid, visit_yr_2, gender, age_2, ethnicity_0, marital_2,        # Dem
 
 all_var_names = ["eid", "visit_yr_2", "gender", "age_2", "ethnicity_0", "marital_2",        # Demographic
                  "ed_yr_2", "emp_2", "income_fam_2", "fncl_sat_2", "hthcare_2",             # Socioeconomic
-                 "lone_2", "social_act_n_2", "social_act_2_none", "social_act_2_sport",     # Network
+                 "lone_2", "social_act_n_2", "social_act_2_sport",     # Network
                  "social_act_2_pub", "social_act_2_religious", "social_act_2_education",    # Network
                  "social_act_2_other",                                                      # Network
                  "freq_visit_2", "confide_2", "fam_sat_2", "frnd_sat_2", "N_fam_2",         # Network
