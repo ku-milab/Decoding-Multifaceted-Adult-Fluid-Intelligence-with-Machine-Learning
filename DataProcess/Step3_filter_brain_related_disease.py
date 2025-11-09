@@ -12,9 +12,11 @@ Disease sets to remove (ICD-10):
 
 Inputs:
 - Step2_1_ukb669045_disease_timing_redefined.csv
+  (disease timing coded as: 0.0, 1.0, 1.5, 2.0)
 
 Outputs:
 - Step3_ukb669045_remove_brain_related_disease_subjects.csv
+  (subjects with any brain-related disease before or at imaging removed)
 """
 
 import os
@@ -51,33 +53,39 @@ if len(brain_cols) == 0:
     df.to_csv(csv_path_out, index=False)
 else:
     # Pull the timing matrix (N × D) for brain-related diseases only
-    # Values are expected to be 0 (no disease) or positive values indicating disease presence
-    brain_disease_info = df[brain_cols].astype(float).to_numpy(copy=True)
+    # Values are expected to be:
+    #   0.0 : no disease
+    #   1.0 : before imaging
+    #   1.5 : on imaging date
+    #   2.0 : after imaging
+    brain_timing = df[brain_cols].astype(float).to_numpy(copy=True)
 
-    # Quick logs: which brain codes are present (any positive timing)
-    def present_cols(arr: np.ndarray) -> list:
+    # Quick logs: which brain codes are present before or at imaging (1.0 or 1.5)
+    def present_cols_before_or_at(arr: np.ndarray) -> list:
         if arr.shape[1] == 0:
             return []
-        has_any = (arr > 0).any(axis=0)
-        return [c for c, keep in zip(brain_cols, has_any) if keep]
+        has_before_or_at = ((arr > 0) & (arr <= 1.5)).any(axis=0)
+        return [c for c, keep in zip(brain_cols, has_before_or_at) if keep]
 
-    print(f"Present brain-related disease codes: {present_cols(brain_disease_info)}")
+    print("Brain-related disease codes (before or at imaging):")
+    print(present_cols_before_or_at(brain_timing))
 
     # ---------- No-disease subject mask ----------
-    # Subjects with no brain-related disease at any time (all entries == 0)
-    if brain_disease_info.size:
-        has_any_brain_disease = (brain_disease_info > 0).any(axis=1)
-        mask_safe = ~has_any_brain_disease
+    # Subjects with any brain-related disease before or at imaging:
+    # timing > 0 and timing <= 1.5
+    if brain_timing.size:
+        has_any_brain_before_or_at = ((brain_timing > 0) & (brain_timing <= 1.5)).any(axis=1)
+        mask_safe = ~has_any_brain_before_or_at
     else:
         # If for some reason there are no brain-related columns, keep everyone
         mask_safe = np.ones(len(df), dtype=bool)
 
-    print(f"No brain disease = {mask_safe.sum()}  "
-          f"Any brain disease = {(~mask_safe).sum()}")
+    print(f"No brain disease before/at imaging = {mask_safe.sum()}  "
+          f"Any brain disease before/at imaging = {(~mask_safe).sum()}")
 
     # ---------- Drop brain-related columns and save ----------
     drop_set = set(brain_cols)
-    keep_cols = ['eid'] + [c for c in df.columns if c not in drop_set and c != 'eid']
+    keep_cols = ["eid"] + [c for c in df.columns if c not in drop_set and c != "eid"]
 
     safe_total = df.loc[mask_safe, keep_cols].copy()
     print("safe_total len:", len(safe_total))
@@ -85,12 +93,13 @@ else:
     safe_total.to_csv(csv_path_out, index=False)
 
     # ---------- Sanity check ----------
-    # From the original df, select only brain-related columns and cast to float
     vals = df[brain_cols].astype(float).to_numpy(copy=False)
 
-    # Presence matrix (1 if any brain disease, 0 otherwise)
-    has_brain_disease = (vals > 0)
+    # Presence matrix (1 if any brain disease before or at imaging, 0 otherwise)
+    has_brain_before_or_at = ((vals > 0) & (vals <= 1.5))
 
     # For "safe" subjects, there should be no brain disease (should print False)
-    print("Exist mask_safe with any brain disease:",
-          has_brain_disease[mask_safe].any())
+    print(
+        "Exist mask_safe with any brain disease before/at imaging:",
+        has_brain_before_or_at[mask_safe].any(),
+    )
