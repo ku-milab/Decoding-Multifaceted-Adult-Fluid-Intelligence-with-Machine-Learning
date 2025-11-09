@@ -11,7 +11,6 @@ Disease first-occurrence dates are taken from UK Biobank field 1712.
 Each disease column is expected to be named '{ICDCode}Date' and to contain dates in the format YYYYMMDD.
 Note that this sub-variable naming ('{ICDCode}Date') does not follow the original UK Biobank convention;
 it was redefined here for convenience.
-
 Input
 ------
 - Step1_3_ukb669045_variable_recoding_and_renaming_value_without_nan_rows.csv
@@ -19,11 +18,23 @@ Input
 Outputs
 -------
 1) Redefined disease timing (date → 1.0, 1.5, 2.0, 0.0):
-   Step2_1_ukb669045_disease_timing_redefined.csv
+   - Step2_1_ukb669045_disease_timing_redefined.csv
 
 2) Disease count per subject
    (1: includes 1.0 and 1.5; 0: includes 0.0 and 2.0):
-   Step2_2_ukb669045_disease_subject_count_before_or_at_imaging.xlsx
+   - Step2_2_ukb669045_disease_subject_count_before_or_at_imaging.xlsx
+
+3) Subjects containing placeholder (missing) date values:
+   - Step2_placeholder_subject_eids.csv
+   - Step2_placeholder_subjects_with_multiple_placeholders.csv
+
+   Placeholder date codes treated as missing:
+     • 1900-01-01  →  no event date
+     • 1901-01-01  →  before date of birth
+     • 1902-02-02  →  same as date of birth
+     • 1903-03-03  →  same year as birth
+     • 1909-09-09  →  future placeholder
+     • 2037-07-07  →  future placeholder
 
 """
 
@@ -59,6 +70,8 @@ total_columns = total_columns + brain_l_columns + brain_r_columns
 csv_path = os.path.join(root_path, 'Step1_3_ukb669045_variable_recoding_and_renaming_value_without_nan_rows.csv')
 csv_path_out = os.path.join(save_root, 'Step2_1_ukb669045_disease_timing_redefined.csv')
 csv_path_disease_number_out = os.path.join(save_root, 'Step2_2_ukb669045_disease_subject_count_before_or_at_imaging.csv')
+csv_placeholder_subject_info = os.path.join(save_root, 'Step2_placeholder_subject_eids.csv')
+csv_multi_placeholder_subject_info = os.path.join(save_root, "Step2_placeholder_subjects_with_multiple_placeholders.csv")
 
 # ---------- Load ----------
 df = pd.read_csv(csv_path)
@@ -117,7 +130,7 @@ if len(disease_date_cols) > 0:
 
     # EIDs of subjects that will be removed
     bad_eids = df.loc[has_placeholder_any, 'eid']
-    bad_eids.to_csv(os.path.join(save_root, 'Step2_placeholder_subject_eids.csv'), index=False)
+    bad_eids.to_csv(csv_placeholder_subject_info, index=False)
 
     # Number of placeholder dates per subject (row-wise sum)
     placeholder_counts_per_subj = placeholder_mask_df.sum(axis=1)
@@ -140,10 +153,7 @@ if len(disease_date_cols) > 0:
     print(multi_placeholder_info)
 
     # Save to CSV
-    multi_placeholder_info.to_csv(
-        os.path.join(save_root, "Step2_placeholder_subjects_with_multiple_placeholders.csv"),
-        index=False
-    )
+    multi_placeholder_info.to_csv(csv_multi_placeholder_subject_info, index=False)
 
     # Conservative choice: drop all subjects who have any placeholder dates
     df = df.loc[~has_placeholder_any].reset_index(drop=True)
