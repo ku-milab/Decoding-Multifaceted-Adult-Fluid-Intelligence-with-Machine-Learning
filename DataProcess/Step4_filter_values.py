@@ -38,10 +38,10 @@ csv_path = os.path.join(root_path, 'Step3', 'Step3_ukb669045_remove_brain_relate
 save_root = os.path.join(root_path, 'Step4')
 os.makedirs(save_root, exist_ok=True)
 
-out_percentile    = os.path.join(save_root, 'step4_1_extract_percentile_fluid_top_bottom_10_percent.csv')
-out_drop_zero     = os.path.join(save_root, 'step4_2_remove_disease_columns_with_summation_zero.csv')
-out_drop_0p1_3    = os.path.join(save_root, 'step4_3_remove_disease_column_with_01_percent_in_population_remaining_subject.csv')
-out_binarize      = os.path.join(save_root, 'step4_4_binarize_disease_column.csv')
+out_percentile    = os.path.join(save_root, 'Step4_1_extract_percentile_fluid_top_bottom_10_percent.csv')
+out_drop_zero     = os.path.join(save_root, 'Step4_2_remove_disease_columns_with_summation_zero.csv')
+out_drop_0p1_3    = os.path.join(save_root, 'Step4_3_remove_disease_column_with_01_percent_in_population_remaining_subject.csv')
+out_binarize      = os.path.join(save_root, 'Step4_4_binarize_disease_column.csv')
 
 # Other information
 final_cols = ["eid", "gender", "age_2", "ethnicity_0", "marital_2",                      # Demographic
