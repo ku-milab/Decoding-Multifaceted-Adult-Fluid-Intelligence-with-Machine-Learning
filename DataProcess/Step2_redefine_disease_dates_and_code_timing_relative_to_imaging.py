@@ -241,3 +241,5 @@ print(n_subj_per_disease)
 # Check how many subjects have at least one disease
 n_subj_with_any_disease = (out_has.sum(axis=1) > 0).sum()
 print(f'Number of subjects who have at least one disease: {n_subj_with_any_disease}')
+
+
