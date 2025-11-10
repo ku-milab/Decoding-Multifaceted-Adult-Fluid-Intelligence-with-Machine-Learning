@@ -10,7 +10,7 @@ csv_path = os.path.join(root_path, 'Step5', 'Step5_refilter_categorical_for_deep
 save_root = os.path.join(root_path, 'Step6')
 os.makedirs(save_root, exist_ok=True)
 
-N_PER_CLASS = 2000   # number of subjects sampled per class in each iteration
+N_PER_CLASS = 2400   # number of subjects sampled per class in each iteration
 N_ITER = 5           # number of repeated iterations
 N_FOLDS = 5          # number of CV folds
 SEED = 2025
