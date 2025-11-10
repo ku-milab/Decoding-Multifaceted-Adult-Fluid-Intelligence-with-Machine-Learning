@@ -1,25 +1,3 @@
-"""
-Data splitting for 5-repeat 5-fold cross-validation.
-
-Inputs:
-- Step5_refilter_categorical_for_deeplearning.csv
-
-Outputs:
-- Iter_<N_ITER>_Folds_<N_FOLDS>.json
-- iter01_folds.json, ..., iter<N_ITER>_folds.json
-- Subject_occurrence_count_<N_ITER>iter_<N_FOLDS>fold.csv
-
-Description:
-This script performs repeated stratified 5-fold cross-validation on the
-top/bottom 10% fluid intelligence subset (already encoded as 'fluid_2_p10').
-
-For each iteration:
-- Randomly samples N_PER_CLASS subjects from each class (fluid_2_p10 = 0 and 1),
-  using a chunk-based scheme to improve coverage across iterations.
-- Performs stratified K-fold splitting (N_FOLDS) on the sampled subjects.
-- Saves train/validation subject IDs (eid) for each fold into JSON files.
-"""
-
 import os, json
 import pandas as pd
 import numpy as np
@@ -32,7 +10,7 @@ csv_path = os.path.join(root_path, 'Step5', 'Step5_refilter_categorical_for_deep
 save_root = os.path.join(root_path, 'Step6')
 os.makedirs(save_root, exist_ok=True)
 
-N_PER_CLASS = 1500   # number of subjects sampled per class in each iteration
+N_PER_CLASS = 2000   # number of subjects sampled per class in each iteration
 N_ITER = 5           # number of repeated iterations
 N_FOLDS = 5          # number of CV folds
 SEED = 2025
@@ -45,7 +23,6 @@ df = pd.read_csv(csv_path)
 if not {'eid', 'fluid_2_p10'}.issubset(df.columns):
     raise ValueError("Required columns: 'eid', 'fluid_2_p10'.")
 
-# Keep only columns needed for splitting (saves memory)
 df = df[['eid', 'fluid_2_p10']].copy()
 
 # ---------- Pool of IDs by class ----------
@@ -56,48 +33,57 @@ rng = np.random.RandomState(SEED)
 rng.shuffle(ids0_all)
 rng.shuffle(ids1_all)
 
-# Split into N_ITER chunks for round-robin coverage
-def chunks(lst, n):
-    return np.array_split(np.array(lst, dtype=object), n)
+# Feasibility check: can we cover all subjects at least once?
+if len(ids0_all) > N_ITER * N_PER_CLASS or len(ids1_all) > N_ITER * N_PER_CLASS:
+    raise ValueError(
+        f"Cannot guarantee full coverage: "
+        f"class0: {len(ids0_all)} subjects, class1: {len(ids1_all)} subjects, "
+        f"but N_ITER * N_PER_CLASS = {N_ITER * N_PER_CLASS}."
+    )
 
-chunks0 = chunks(ids0_all, N_ITER)  # list of length N_ITER (each element: np.array)
-chunks1 = chunks(ids1_all, N_ITER)
-
-def sample_for_iter(chunks_c, all_ids_c, iter_idx, n_pick, rnd):
+# ---------- Helper: coverage-aware sampler ----------
+def sample_for_iter_with_coverage(all_ids, covered, n_pick, rnd):
     """
-    For a given class and iteration, first use the iter_idx-th chunk as a base set.
-    If the chunk size is smaller than n_pick, fill the remainder from the full pool
-    (preferring IDs not in the base, allowing duplicates only if necessary).
+    Sample 'n_pick' unique IDs for this iteration such that:
+    - IDs not yet in 'covered' are preferred (to guarantee everyone appears at least once)
+    - No duplicates within this iteration
+    - 'covered' is updated with the picked IDs
     """
-    base = chunks_c[iter_idx].tolist()
-    need = n_pick - len(base)
-    if need <= 0:
-        # If the chunk is larger than needed, subsample without replacement
-        return rnd.choice(base, size=n_pick, replace=False).tolist()
+    # IDs that have never been used in any previous iteration
+    remaining = [e for e in all_ids if e not in covered]
 
-    # Remainder candidates: all IDs not in 'base'
-    rest = [e for e in all_ids_c if e not in set(base)]
-    if len(rest) >= need:
-        extra = rnd.choice(rest, size=need, replace=False).tolist()
+    if len(remaining) >= n_pick:
+        # We can fill this iteration entirely with never-used IDs
+        pick = rnd.choice(remaining, size=n_pick, replace=False).tolist()
     else:
-        # If not enough unique IDs, allow replacement to fill up
-        extra = rnd.choice(all_ids_c, size=need, replace=True).tolist()
-    return base + extra
+        # Use all remaining never-used IDs, then fill the rest from the full pool
+        base = remaining                       # all still-uncovered IDs
+        need = n_pick - len(base)
+        # candidates: everyone except those already in this iteration (avoid duplicates)
+        candidates = [e for e in all_ids if e not in set(base)]
+        extra = rnd.choice(candidates, size=need, replace=False).tolist()
+        pick = base + extra
+
+    # Sanity: no duplicates within this iteration
+    assert len(pick) == len(set(pick)), "Duplicates within iteration detected!"
+    covered.update(pick)
+    return pick
 
 # ---------- Build 5 repeated splits ----------
-iterations = []  # each element: dict(iteration, class0_count, class1_count, folds[...])
+covered0, covered1 = set(), set()
+iterations = []
 
 for it in range(N_ITER):
-    # Sample N_PER_CLASS per class for this iteration
-    pick0 = sample_for_iter(chunks0, ids0_all, it, N_PER_CLASS, rng)
-    pick1 = sample_for_iter(chunks1, ids1_all, it, N_PER_CLASS, rng)
+    # Sample N_PER_CLASS per class for this iteration (coverage-aware)
+    pick0 = sample_for_iter_with_coverage(ids0_all, covered0, N_PER_CLASS, rng)
+    pick1 = sample_for_iter_with_coverage(ids1_all, covered1, N_PER_CLASS, rng)
+
     iter_ids = np.array(pick0 + pick1, dtype=object)
     rng.shuffle(iter_ids)
 
     sub = df[df['eid'].isin(iter_ids)].copy()
     y = sub['fluid_2_p10'].values
 
-    # Stratified K-fold splitting
     skf = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED + it)
     folds = []
     for fold_id, (tr_idx, te_idx) in enumerate(skf.split(sub, y), start=1):
@@ -106,7 +92,7 @@ for it in range(N_ITER):
         folds.append({
             "fold": fold_id,
             "train_eid": tr_eids,
-            "valid_eid": te_eids
+            "valid_eid": te_eids  # <- 여기서 valid를 test처럼 쓰는 거 그대로 유지
         })
 
     iterations.append({
@@ -116,8 +102,11 @@ for it in range(N_ITER):
         "folds": folds
     })
 
-# ---------- Save JSON splits ----------
-# 1) Save all iterations into a single JSON file
+# 최종적으로 coverage가 잘 됐는지 한번 더 확인 (optional)
+assert len(covered0) == len(ids0_all), f"class0: {len(covered0)} covered vs {len(ids0_all)} total"
+assert len(covered1) == len(ids1_all), f"class1: {len(covered1)} covered vs {len(ids1_all)} total"
+
+# ---------- Save JSON (기존과 동일) ----------
 with open(json_all_path, "w") as f:
     json.dump(
         {
@@ -134,32 +123,29 @@ with open(json_all_path, "w") as f:
     )
 print(f"Saved: {json_all_path}")
 
-# 2) Optionally, also save per-iteration JSON files
 for item in iterations:
     ipath = os.path.join(save_root, f"iter{item['iteration']:02d}_folds.json")
     with open(ipath, "w") as f:
         json.dump(item, f, indent=2)
     print(f"Saved: {ipath}")
+
 # ---------- Sanity check + subject occurrence counting (validation-based) ----------
 with open(json_all_path, 'r') as f:
     ids = json.load(f)
 
 valid_total = []
-subject_counter = {}  # counts how many times each subject appears in VALIDATION sets
+subject_counter = {}
 
 for iteridx in range(N_ITER):
     iter_wise = []
     print(f"\n===== Iteration {iteridx + 1} =====")
     for foldidx in range(N_FOLDS):
         iteration_fold = ids['iterations'][iteridx]['folds'][foldidx]
-
-        # We treat 'valid_eid' as the test set for this fold
         valid_eid = iteration_fold['valid_eid']
 
         iter_wise.extend(valid_eid)
         valid_total.extend(valid_eid)
 
-        # ---- Count appearance frequency across all VALIDATION sets ----
         for eid in valid_eid:
             subject_counter[eid] = subject_counter.get(eid, 0) + 1
 
@@ -175,7 +161,6 @@ for iteridx in range(N_ITER):
 valid_total_unique = len(np.unique(valid_total))
 print(f"\n=== Unique validation subjects across all {N_ITER} iterations: {valid_total_unique}")
 
-# ---------- Save subject occurrence count (validation-based) ----------
 count_df = pd.DataFrame(list(subject_counter.items()), columns=["eid", "valid_count"])
 count_df.to_csv(count_csv_path, index=False)
 
