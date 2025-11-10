@@ -30,6 +30,9 @@ import numpy as np
 total_csv_path = '/media/dwh/b9bd8b27-0895-494e-8a2a-2d019ae4bf2c/UKB/FinalFinal_Version_1108/Step0/Step0_2_ukb669045_total_data_with_complete_cortical_thickness.csv'
 save_root = '/media/dwh/b9bd8b27-0895-494e-8a2a-2d019ae4bf2c/UKB/FinalFinal_Version_1108/Step1'
 os.makedirs(save_root, exist_ok=True)
+save_reverse_code = os.path.join(save_root, 'Step1_1_ukb669045_reverse_coding_recoding_renaming.csv')
+save_reverse_code_count = os.path.join(save_root, "Step1_2_ukb669045_variable_recoding_and_renaming_value_counts.xlsx")
+save_path_without_nan = os.path.join(save_root, "Step1_3_ukb669045_variable_recoding_and_renaming_value_without_nan_rows.csv")
 
 total_df = pd.read_csv(total_csv_path, low_memory=False)
 
@@ -468,19 +471,19 @@ print(f"[INFO] Initial -3 count:  {n_minus3_init}")
 print(f"[INFO] Initial -7 count:  {n_minus7_init}")
 print(f"[INFO] Initial 0 count:   {n_zero_init}")
 
-# --- Step 2. Replace -3 → 0 ---
-S = soc_raw.replace(-3, 0)
+# --- Step 2. Replace -3 → NaN ---
+S = soc_raw.replace([-3], np.nan)
 
-# Check counts after -3→NaN
+# Check counts after -3 → NaN
 n_nan_after3 = S.isna().sum().sum()
 n_minus3_after = (S == -3).sum().sum()
 n_minus7_after = (S == -7).sum().sum()
 n_zero_after3  = (S == 0).sum().sum()
-print(f"[INFO] After replacing -3→NaN:")
-print(f"       NaN count: {n_nan_after3}, -3 count (should be 0): {n_minus3_after}, -7 count: {n_minus7_after}, 0 count: {n_zero_after3}")
+print(f"[INFO] After replacing -3 → NaN:")
+print(f"       NaN count: {n_nan_after3}, -3 count (should be NaN): {n_minus3_after}, -7 count: {n_minus7_after}, 0 count: {n_zero_after3}")
 
 # --- Step 3. Replace -7 → 0 ---
-S = S.replace(-7, 0)
+S = S.replace([-7], 0)
 
 # Check counts after -7→0
 n_nan_after7 = S.isna().sum().sum()
@@ -554,74 +557,66 @@ def compute_met_no_row_drop(df, exclude_extreme_outliers=True):
     Compute MET-min/week without dropping rows.
 
     - Keeps all rows (N fixed)
-    - For duration columns: values <10 minutes set to 0 (IPAQ rule)
-    - Codes -1, -2, -3 (do not know / unable to walk / prefer not to answer) => treated as missing
-      → if they appear in ANY of the 6 fields in a row, that row's MET_* are set to NaN
-    - If at least one of walk/mod/vig has a valid response (not NaN, not -1/-3),
-      missing values in the other activities are replaced with 0.
-    - Truncate: days [0,7], minutes/day [0,180]
-    - Extreme cases (total daily minutes > 960) masked as NaN
-    - MET_total = sum of 3 METs (NaN if all missing)
+    - For duration columns: values <10 minutes set to 0 (IPAQ rule),
+      but missing values (including -1, -2, -3) are kept as NaN.
+    - Codes -1, -2, -3 (do not know / unable to walk / prefer not to answer)
+      are treated as missing and converted to NaN.
+    - Days are truncated to [0, 7], minutes/day to [0, 180].
+    - MET_walk, MET_mod, MET_vig are computed from (days × minutes × MET factor).
+    - MET_total is the sum of the three METs where:
+        * if all three METs are NaN → MET_total = NaN
+        * otherwise, NaNs in MET_walk/MET_mod/MET_vig are treated as 0 when summing.
+    - Extreme cases (total daily minutes > 960) have all MET_* (including MET_total) set to NaN.
     """
+
     day_cols = ['864-2.0', '884-2.0', '904-2.0']  # walk/mod/vig days per week
     dur_cols = ['874-2.0', '894-2.0', '914-2.0']  # walk/mod/vig minutes per day
     cols = day_cols + dur_cols
 
     out = df[cols].copy()
 
-    # (0) Mark rows where -1, -2 or -3 appears in any of the six activity fields
-    had_neg_code = out.isin([-1, -2, -3]).any(axis=1)
+    # 1) Convert codes -1, -2, -3 to NaN (missing values)
+    out[cols] = out[cols].replace([-1, -2, -3], np.nan)
 
-    # 1) -1, -3 → NaN
-    out = out.replace([-1, -2, -3], np.nan)
-
-    # 1-2) Check how many rows have all 6 columns missing after code replacement
-    all_missing_initial = out.isna().all(axis=1)
-    n_all_missing_initial = all_missing_initial.sum()
-    print(f"[INFO] Number of subjects with all activity fields missing after replacing -1/-3: {n_all_missing_initial}")
-
-    # 2) Values <10 minutes set to 0 (IPAQ rule)
+    # 2) Apply IPAQ rule: values <10 minutes are set to 0
+    #    Missing values remain as NaN
     for dur_col in dur_cols:
         out[dur_col] = np.where(out[dur_col].ge(10), out[dur_col],
                                 np.where(out[dur_col].isna(), np.nan, 0.0))
 
-    # 3) If at least one of walk/mod/vig has a valid response, missing values in the other activities are replaced with 0.
-    has_any_valid = out[day_cols + dur_cols].notna().any(axis=1)
-    for col in cols:
-        out.loc[has_any_valid & out[col].isna(), col] = 0.0
-
-    # 4) IPAQ truncation
+    # 3) Apply truncation limits according to IPAQ:
+    #    - Days are limited to the range [0, 7]
+    #    - Minutes per day are limited to the range [0, 180]
     for dcol in day_cols:
         out[dcol] = out[dcol].clip(0, 7)
     for tcol in dur_cols:
         out[tcol] = out[tcol].clip(0, 180)
 
-    # 5) MET calculation
+    # 4) Compute MET values for each activity type
+    #    MET = MET_factor × minutes/day × days/week
     WALK_MET, MOD_MET, VIG_MET = 3.3, 4.0, 8.0
     out["MET_walk"] = WALK_MET * out['874-2.0'] * out['864-2.0']
     out["MET_mod"]  = MOD_MET  * out['894-2.0'] * out['884-2.0']
     out["MET_vig"]  = VIG_MET  * out['914-2.0'] * out['904-2.0']
 
-    # 6) MET_total = sum of 3 METs (NaN if all missing)
-    out["MET_total"] = out[["MET_walk","MET_mod","MET_vig"]].sum(axis=1, skipna=True, min_count=1)
+    # 5) Compute total MET:
+    #    - If all three MET values are NaN → MET_total = NaN
+    #    - Otherwise, replace NaNs with 0 and sum the three
+    met_cols = ["MET_walk", "MET_mod", "MET_vig"]
+    all_nan_mask = out[met_cols].isna().all(axis=1)
 
-    # 7) Extreme cases (total daily minutes > 960) masked as NaN
+    out["MET_total"] = out[met_cols].fillna(0).sum(axis=1)
+    out.loc[all_nan_mask, "MET_total"] = np.nan
+
+    # 6) Mark extreme cases as NaN:
+    #    If total minutes/day > 960, all MET fields are masked
     if exclude_extreme_outliers:
         total_daily_mins = out['874-2.0'] + out['894-2.0'] + out['914-2.0']
         mask_extreme = total_daily_mins > 960
         out.loc[mask_extreme, ["MET_walk","MET_mod","MET_vig","MET_total"]] = np.nan
         print(f"[INFO] Number of extreme-outlier subjects masked (>960 min/day): {mask_extreme.sum()}")
 
-    # 8) If all activity variables are NaN, make the whole row NaN
-    all_missing_final = out[cols].isna().all(axis=1)
-    out.loc[all_missing_final, ["MET_walk","MET_mod","MET_vig","MET_total"]] = np.nan
-    n_all_missing_final = all_missing_final.sum()
-    print(f"[INFO] Number of subjects with all activity fields missing at the end: {n_all_missing_final}")
-
-    # (9) Force MET_* values to NaN for all rows that originally contained -1 or -3
-    out.loc[had_neg_code, ["MET_walk", "MET_mod", "MET_vig", "MET_total"]] = np.nan
-
-    # Optional summary print
+    # 7) Summary checks
     n_valid_met = out["MET_total"].notna().sum()
     print(f"[INFO] Number of subjects with valid MET_total: {n_valid_met}")
 
@@ -783,8 +778,8 @@ if neg_mask.sum().sum() > 0:
     # Replace remaining negative codes (-1, -3, -7) with NaN
     final_df = final_df.replace([-1, -3, -7], np.nan)
 
-final_df.to_csv(os.path.join(save_root, 'Step1_1_ukb669045_reverse_coding_recoding_renaming.csv'), index=False)
-print(f"Saved final dataset to: {os.path.join(save_root, 'Step1_1_ukb669045_reverse_coding_recoding_renaming.csv')}")
+final_df.to_csv(save_reverse_code, index=False)
+print(f"Saved final dataset to: {save_reverse_code}")
 
 
 # Save value counts for selected variables to an Excel file
@@ -820,7 +815,7 @@ def value_counts_to_excel(df, columns, excel_path):
 
     print(f"Finished saving value counts to: {excel_path}")
 
-value_counts_to_excel(final_df, all_var_names, os.path.join(save_root, "Step1_2_ukb669045_variable_recoding_and_renaming_value_counts.xlsx"))
+value_counts_to_excel(final_df, all_var_names, save_reverse_code_count)
 
 
 ##### Save no-NaN rows only
@@ -839,6 +834,5 @@ n_nans = previous_df_no_nan.isna().sum().sum()
 print(f"Total remaining NaN values (should be 0): {n_nans}")
 
 # Save
-save_path = os.path.join(save_root, "Step1_3_ukb669045_variable_recoding_and_renaming_value_without_nan_rows.csv")
-previous_df_no_nan.to_csv(save_path, index=False)
-print(f"Saved clean dataset to: {save_path}")
+previous_df_no_nan.to_csv(save_path_without_nan, index=False)
+print(f"Saved clean dataset to: {save_path_without_nan}")
