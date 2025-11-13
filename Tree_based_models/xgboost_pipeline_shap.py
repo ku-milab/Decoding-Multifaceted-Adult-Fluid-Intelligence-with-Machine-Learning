@@ -29,7 +29,7 @@ import numpy as np
 import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
-from dataloader import select_data
+from data_utils import select_data
 from sklearn.metrics import confusion_matrix
 
 
