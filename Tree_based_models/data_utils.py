@@ -1,0 +1,187 @@
+import numpy as np
+
+def select_data(variable_type):
+
+    if variable_type == 'all':
+        # ------ Categorical variables
+        category_col = ["gender", "ethnicity_0", "marital_2",                                      # Demographic
+                        "emp_2", "income_fam_2",                                                   # Socioeconomic
+                        "lone_2", "social_act_2_sport", "social_act_2_pub",                        # Network
+                        "social_act_2_religious", "social_act_2_education", "social_act_2_other",  # Network
+                        "smoke_status_2", "glass_lenses_2", "eye_issue_2",                         # Health
+                        "hearing_issue_2", "hearing_issue_bg_2", "hearing_aid_2"]                  # Health
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = category_col + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [2, 5, 2, 7, 5, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        # ------ Continuous variables
+        continue_col = ["age_2",                                                  # Demographic
+                        "ed_yr_2", "fncl_sat_2", "hthcare_2",                     # Socioeconomic
+                        "social_act_n_2", "freq_visit_2", "confide_2",            # Network
+                        "fam_sat_2", "frnd_sat_2", "N_fam_2",                     # Network
+                        "alcohol_2", "phq2_2", "hlth_sat_2", "sleep_2", "bmi_2",  # Health
+                        "met_2"]                                                  # Physical
+
+        # Brain imaging columns (left/right indices → column names)
+        left_index = np.arange(26755, 26788 + 1)
+        right_index = np.arange(26856, 26889 + 1)
+        brain_l = [f"{i}-2.0" for i in left_index]
+        brain_r = [f"{i}-2.0" for i in right_index]
+        brain_columns = brain_l + brain_r
+        continue_col = continue_col + brain_columns
+
+        print('!!!!!!!!!!!!!!!!!!!! total variables: ', len(continue_col))
+        return category_col, continue_col, Categories
+
+    elif variable_type == 'brain':
+        left_index = np.arange(26755, 26788 + 1)
+        right_index = np.arange(26856, 26889 + 1)
+        brain_l = [f"{i}-2.0" for i in left_index]
+        brain_r = [f"{i}-2.0" for i in right_index]
+        continue_col = brain_l + brain_r
+        return None, continue_col, None
+
+    elif variable_type == 'health':
+        # ------ Categorical variables
+        category_col = ["smoke_status_2", "glass_lenses_2", "eye_issue_2",                         # Health
+                        "hearing_issue_2", "hearing_issue_bg_2", "hearing_aid_2"]                  # Health
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = category_col + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [3, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        # ------ Continuous variables
+        continue_col = ["alcohol_2", "phq2_2", "hlth_sat_2", "sleep_2", "bmi_2",  # Health
+                        "met_2"]                                                  # Physical
+
+        return category_col, continue_col, Categories
+
+    elif variable_type == 'socio':
+        # ------ Categorical variables
+        category_col = ["gender", "ethnicity_0", "marital_2",                                      # Demographic
+                        "emp_2", "income_fam_2",                                                   # Socioeconomic
+                        "lone_2", "social_act_2_sport", "social_act_2_pub",                        # Network
+                        "social_act_2_religious", "social_act_2_education", "social_act_2_other",]  # Network
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = category_col + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [2, 5, 2, 7, 5, 2, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        # ------ Continuous variables
+        continue_col = ["age_2",                                                  # Demographic
+                        "ed_yr_2", "fncl_sat_2", "hthcare_2",                     # Socioeconomic
+                        "social_act_n_2", "freq_visit_2", "confide_2",            # Network
+                        "fam_sat_2", "frnd_sat_2", "N_fam_2"]                     # Network
+
+        return category_col, continue_col, Categories
+
+
+    elif variable_type == 'brain_health':
+        # ------ Continuous variables
+        left_index = np.arange(26755, 26788 + 1)
+        right_index = np.arange(26856, 26889 + 1)
+        brain_l = [f"{i}-2.0" for i in left_index]
+        brain_r = [f"{i}-2.0" for i in right_index]
+        brain_cols = brain_l + brain_r
+
+        health_cont_cols = ["alcohol_2", "phq2_2", "hlth_sat_2", "sleep_2", "bmi_2",  # Health
+                            "met_2"]                                                  # Physical
+        continue_col = health_cont_cols + brain_cols
+
+        # ------ Categorical variables
+        category_col = ["smoke_status_2", "glass_lenses_2", "eye_issue_2",                         # Health
+                        "hearing_issue_2", "hearing_issue_bg_2", "hearing_aid_2"]                  # Health
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = category_col + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [3, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        return category_col, continue_col, Categories
+
+
+    elif variable_type == 'brain_socio':
+        # ------ Continuous variables
+        left_index = np.arange(26755, 26788 + 1)
+        right_index = np.arange(26856, 26889 + 1)
+        brain_l = [f"{i}-2.0" for i in left_index]
+        brain_r = [f"{i}-2.0" for i in right_index]
+        brain_cols = brain_l + brain_r
+
+        socio_cont_cols = ["age_2",                                                  # Demographic
+                           "ed_yr_2", "fncl_sat_2", "hthcare_2",                     # Socioeconomic
+                           "social_act_n_2", "freq_visit_2", "confide_2",            # Network
+                           "fam_sat_2", "frnd_sat_2", "N_fam_2"]                     # Network
+
+        continue_col = socio_cont_cols + brain_cols
+
+        # ------ Categorical variables
+        category_col = ["gender", "ethnicity_0", "marital_2",                                      # Demographic
+                        "emp_2", "income_fam_2",                                                   # Socioeconomic
+                        "lone_2", "social_act_2_sport", "social_act_2_pub",                        # Network
+                        "social_act_2_religious", "social_act_2_education", "social_act_2_other",]  # Network
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = category_col + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [2, 5, 2, 7, 5, 2, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        return category_col, continue_col, Categories
+
+
+    elif variable_type == 'health_socio':
+        # ------ Continuous variables
+        socio_cont_cols = ["age_2",                                                  # Demographic
+                           "ed_yr_2", "fncl_sat_2", "hthcare_2",                     # Socioeconomic
+                           "social_act_n_2", "freq_visit_2", "confide_2",            # Network
+                           "fam_sat_2", "frnd_sat_2", "N_fam_2"]                     # Network
+
+        # ------ Continuous variables
+        health_cont_cols = ["alcohol_2", "phq2_2", "hlth_sat_2", "sleep_2", "bmi_2",  # Health
+                            "met_2"]                                                  # Physical
+
+        continue_col = socio_cont_cols + health_cont_cols
+
+        # ------ Categorical variables
+        socio_cat_cols = ["gender", "ethnicity_0", "marital_2",                                      # Demographic
+                          "emp_2", "income_fam_2",                                                   # Socioeconomic
+                          "lone_2", "social_act_2_sport", "social_act_2_pub",                        # Network
+                          "social_act_2_religious", "social_act_2_education", "social_act_2_other",]  # Network
+
+        health_cat_cols = ["smoke_status_2", "glass_lenses_2", "eye_issue_2",                         # Health
+                           "hearing_issue_2", "hearing_issue_bg_2", "hearing_aid_2"]                  # Health
+
+        # Disase - categorical
+        disease_cols_all = ['A02', 'A04', 'A07', 'A08', 'A09', 'A15', 'A37', 'A38', 'A41', 'A49', 'A60', 'A63', 'A80', 'B00', 'B01', 'B02', 'B05', 'B06', 'B07', 'B08', 'B15', 'B16', 'B18', 'B19', 'B26', 'B27', 'B34', 'B35', 'B36', 'B37', 'B54', 'B65', 'B80', 'B86', 'B95', 'B96', 'B97', 'B98', 'B99', 'D50', 'D51', 'D61', 'D64', 'D68', 'D69', 'D70', 'D72', 'D75', 'D86', 'E03', 'E04', 'E05', 'E06', 'E07', 'E10', 'E11', 'E14', 'E16', 'E21', 'E22', 'E23', 'E27', 'E28', 'E53', 'E55', 'E66', 'E78', 'E80', 'E83', 'E86', 'E87', 'E89', 'F10', 'F17', 'F31', 'F32', 'F33', 'F34', 'F39', 'F40', 'F41', 'F43', 'F45', 'F48', 'F50', 'F52', 'F53', 'H00', 'H01', 'H02', 'H04', 'H05', 'H10', 'H11', 'H15', 'H16', 'H18', 'H20', 'H21', 'H25', 'H26', 'H31', 'H33', 'H34', 'H35', 'H36', 'H40', 'H43', 'H44', 'H47', 'H50', 'H52', 'H53', 'H54', 'H57', 'H60', 'H61', 'H65', 'H66', 'H68', 'H69', 'H72', 'H80', 'H81', 'H83', 'H90', 'H91', 'H92', 'H93', 'I00', 'I08', 'I10', 'I20', 'I21', 'I24', 'I25', 'I26', 'I30', 'I31', 'I34', 'I35', 'I42', 'I44', 'I45', 'I47', 'I48', 'I49', 'I50', 'I51', 'I70', 'I71', 'I73', 'I74', 'I77', 'I78', 'I80', 'I82', 'I83', 'I84', 'I86', 'I87', 'I89', 'I95', 'J00', 'J01', 'J02', 'J03', 'J04', 'J06', 'J11', 'J13', 'J18', 'J20', 'J22', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35', 'J36', 'J38', 'J39', 'J40', 'J43', 'J44', 'J45', 'J47', 'J81', 'J84', 'J90', 'J92', 'J93', 'J98', 'K00', 'K01', 'K02', 'K04', 'K05', 'K07', 'K08', 'K09', 'K10', 'K11', 'K12', 'K13', 'K14', 'K20', 'K21', 'K22', 'K25', 'K26', 'K27', 'K29', 'K30', 'K31', 'K35', 'K37', 'K40', 'K41', 'K42', 'K43', 'K44', 'K46', 'K50', 'K51', 'K52', 'K55', 'K56', 'K57', 'K58', 'K59', 'K60', 'K61', 'K62', 'K63', 'K64', 'K65', 'K66', 'K70', 'K75', 'K76', 'K80', 'K81', 'K82', 'K83', 'K85', 'K86', 'K90', 'K92', 'L02', 'L03', 'L05', 'L08', 'L13', 'L20', 'L21', 'L23', 'L25', 'L28', 'L29', 'L30', 'L40', 'L42', 'L43', 'L50', 'L53', 'L57', 'L60', 'L63', 'L65', 'L70', 'L71', 'L72', 'L73', 'L74', 'L80', 'L81', 'L82', 'L84', 'L85', 'L90', 'L91', 'L92', 'L94', 'L98', 'M06', 'M10', 'M11', 'M13', 'M15', 'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M35', 'M41', 'M43', 'M45', 'M46', 'M47', 'M48', 'M50', 'M51', 'M53', 'M54', 'M62', 'M65', 'M66', 'M67', 'M70', 'M71', 'M72', 'M75', 'M76', 'M77', 'M79', 'M80', 'M81', 'M84', 'M85', 'M86', 'M89', 'M93', 'M94', 'M95', 'N02', 'N05', 'N10', 'N12', 'N13', 'N17', 'N18', 'N19', 'N20', 'N21', 'N23', 'N28', 'N30', 'N31', 'N32', 'N34', 'N35', 'N36', 'N39', 'N40', 'N41', 'N42', 'N43', 'N45', 'N46', 'N47', 'N48', 'N50', 'N60', 'N61', 'N62', 'N63', 'N64', 'N70', 'N72', 'N73', 'N75', 'N76', 'N80', 'N81', 'N83', 'N84', 'N85', 'N86', 'N87', 'N88', 'N89', 'N90', 'N91', 'N92', 'N93', 'N94', 'N95', 'N97', 'O00', 'O02', 'O03', 'O04', 'O06', 'O13', 'O14', 'O16', 'O20', 'O21', 'O24', 'O26', 'O30', 'O32', 'O34', 'O36', 'O42', 'O43', 'O46', 'O47', 'O48', 'O60', 'O62', 'O63', 'O64', 'O66', 'O68', 'O69', 'O70', 'O72', 'O73', 'O75', 'O80', 'O81', 'O82', 'O86', 'O99', 'Q18', 'Q43', 'Q53', 'Q61', 'Q63', 'Q66', 'Q76', 'Q82']
+        category_col = socio_cat_cols + health_cat_cols + disease_cols_all
+
+        # ------ Categories info - each of a number of categories
+        category_without_disease = [2, 5, 2, 7, 5, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2]
+        category_with_disease = [2] * len(disease_cols_all)
+        Categories = category_without_disease + category_with_disease
+
+        return category_col, continue_col, Categories
