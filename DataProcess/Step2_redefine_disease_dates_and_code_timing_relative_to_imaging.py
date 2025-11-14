@@ -48,8 +48,8 @@ total_columns = ["eid", "visit_yr_2", "gender", "age_2", "ethnicity_0", "marital
                  "met_2",                                                                   # Physical
                  "fluid_2"]                                                                 # Cognition
 
-left_index = np.arange(26755, 26788 + 1)
-right_index = np.arange(26856, 26889 + 1)
+left_index = np.arange(26756, 26788 + 1)
+right_index = np.arange(26857, 26889 + 1)
 brain_l_columns = [f"{i}-2.0" for i in left_index]
 brain_r_columns = [f"{i}-2.0" for i in right_index]
 total_columns = total_columns + brain_l_columns + brain_r_columns
