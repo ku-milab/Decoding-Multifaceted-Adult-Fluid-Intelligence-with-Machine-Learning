@@ -70,7 +70,6 @@ print(f"The number of NaN values only in the visit date column: {visit_only_nan.
 
 # Compute rough age (year difference between imaging visit year and birth year)
 age_2 = visit.dt.year - birth
-# TODO: optionally plot the distribution of age_2 here
 
 # Convert visit date (YYYYMMDD) into integer format (NaT → NaN handled via fillna)
 visit_yr_2 = visit.dt.strftime("%Y%m%d").fillna("0").astype(int)
@@ -105,7 +104,6 @@ print(f"Unique values in the original sleep duration column: {np.unique(sleep_2)
 sleep_2 = sleep_2.replace([-1, -3], np.nan)
 print(f"Unique values after recoding sleep duration: {np.unique(sleep_2)}")
 print(sleep_2.value_counts(dropna=False))  # Check value counts
-# TODO: optionally plot the distribution of sleep_2 here
 
 
 ##### Alcohol intake
@@ -536,7 +534,6 @@ N_fam_2 = N_fam_2.replace([-1, -3], np.nan)
 
 print("Value counts for the number in household:")
 print(N_fam_2.value_counts(dropna=False))  # Check value counts
-# TODO: optionally plot the distribution of N_fam_2 here
 
 
 ##### Average total household income before tax
