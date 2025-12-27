@@ -1,16 +1,16 @@
 import os, json
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 
 # ---------- Config ----------
-root_path = '/media/dwh/b9bd8b27-0895-494e-8a2a-2d019ae4bf2c/UKB/FinalFinal_Version_1108'
+root_path = '/media/dwh/b9bd8b27-0895-494e-8a2a-2d019ae4bf2c/UKB_Final/Final_Version_for_Git'
 csv_path = os.path.join(root_path, 'Step5', 'Step5_refilter_categorical_for_deeplearning.csv')
 
 save_root = os.path.join(root_path, 'Step6')
 os.makedirs(save_root, exist_ok=True)
 
-N_PER_CLASS = 2400   # number of subjects sampled per class in each iteration
+N_PER_CLASS = 2200   # number of subjects sampled per class in each iteration
 N_ITER = 5           # number of repeated iterations
 N_FOLDS = 5          # number of CV folds
 SEED = 2025
@@ -23,7 +23,7 @@ df = pd.read_csv(csv_path)
 if not {'eid', 'fluid_2_p10'}.issubset(df.columns):
     raise ValueError("Required columns: 'eid', 'fluid_2_p10'.")
 
-df = df[['eid', 'fluid_2_p10']].copy()
+df = df[['eid', 'fluid_2_p10']].drop_duplicates('eid').copy()
 
 # ---------- Pool of IDs by class ----------
 ids0_all = df.loc[df['fluid_2_p10'] == 0, 'eid'].unique().tolist()
@@ -86,13 +86,24 @@ for it in range(N_ITER):
 
     skf = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED + it)
     folds = []
-    for fold_id, (tr_idx, te_idx) in enumerate(skf.split(sub, y), start=1):
-        tr_eids = sub.iloc[tr_idx]['eid'].tolist()
+    for fold_id, (tr_val_idx, te_idx) in enumerate(skf.split(sub, y), start=1):
+        train_valid_df = sub.iloc[tr_val_idx][['eid', 'fluid_2_p10']].copy()
+        train_valid_eid = train_valid_df['eid'].to_numpy()
+        train_valid_labels = train_valid_df['fluid_2_p10'].to_numpy()
+
+        # ---- Split validation (Stratified 10%) ----
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=42)
+        train_idx, valid_idx = next(sss.split(train_valid_eid, train_valid_labels))
+
+        tr_eids = train_valid_eid[train_idx].tolist()
+        val_eids = train_valid_eid[valid_idx].tolist()
+
         te_eids = sub.iloc[te_idx]['eid'].tolist()
         folds.append({
             "fold": fold_id,
             "train_eid": tr_eids,
-            "valid_eid": te_eids  # <- 여기서 valid를 test처럼 쓰는 거 그대로 유지
+            "valid_eid": val_eids,
+            "test_eid": te_eids  # <- 여기서 valid를 test처럼 쓰는 거 그대로 유지
         })
 
     iterations.append({
