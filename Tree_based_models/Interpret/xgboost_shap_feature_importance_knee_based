@@ -122,7 +122,7 @@ N_ID = uniq_eid.numel()
 
 correct_mat = torch.zeros(N_ID, N_ITER * N_FOLD, dtype=torch.int16)
 true_mat = torch.zeros(N_ID, N_ITER * N_FOLD, dtype=torch.int16)
-present_mat = torch.zeros(N_ID, N_ITER * N_FOLD, dtype=torch.int16)  # ★ 추가
+present_mat = torch.zeros(N_ID, N_ITER * N_FOLD, dtype=torch.int16)
 
 col = 0
 for it in range(N_ITER):
@@ -142,7 +142,7 @@ for it in range(N_ITER):
 
         true_mat[idx_map, col] = true_lab.short()
         correct_mat[idx_map, col] = (true_lab == pred_lab).short()
-        present_mat[idx_map, col] = 1  # ★ 추가
+        present_mat[idx_map, col] = 1
         col += 1
 
         del fold_df
@@ -242,7 +242,6 @@ def group_mean(eid_idx_tensor):
         eid_mean_mag[eid_idx_tensor].std(dim=0),
         eid_mean_sign[eid_idx_tensor].std(dim=0),
     )
-
 
 group_mean_mag = {}
 group_mean_sign = {}
