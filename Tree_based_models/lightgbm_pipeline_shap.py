@@ -118,7 +118,6 @@ csv_save_total_averaged_results = f"{args.outdir}/Lightgbm_shap_averaged_total_r
 
 # ------------------- Read Data -------------------
 df = pd.read_csv(data_path)
-df = df.fillna(0.0)
 
 eid_col = 'eid'
 if args.cls_type == 'gf':
