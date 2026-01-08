@@ -95,7 +95,11 @@ args = parse_args()
 variable_type = args.variable_type
 cls_type = args.cls_type
 root_path = f'{args.root_path}/{cls_type}/{variable_type}'
+
+# The subfolder records the hyperparameters used in prior training.
+# Modify this value to match your own training setup.
 subfolder = 'hist_md3_lr0.01_ne800_mcw5.0_gam0.1_ss0.8_cb0.8_ra0.2_rl1.0'
+
 data_path = f'{root_path}/{subfolder}/XGBoost_shap_{variable_type}_all_iters_folds.csv'
 save_root = f'{args.outdir}/{cls_type}/{variable_type}'
 os.makedirs(save_root, exist_ok=True)
