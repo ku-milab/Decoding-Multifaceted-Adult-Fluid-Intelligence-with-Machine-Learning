@@ -94,7 +94,11 @@ args = parse_args()
 variable_type = args.variable_type
 cls_type = args.cls_type
 root_path = f'{args.root_path}/{cls_type}/{variable_type}'
+
+# The subfolder records the hyperparameters used in prior training.
+# Modify this value to match your own training setup.
 subfolder = 'ne800_md40_mf0.3_msl5_mss2_cwbalanced_ms0.9'
+
 data_path = f'{root_path}/{subfolder}/Randomforest_shap_{variable_type}_all_iters_folds.csv'
 save_root = f'{args.outdir}/{cls_type}/{variable_type}'
 os.makedirs(save_root, exist_ok=True)
