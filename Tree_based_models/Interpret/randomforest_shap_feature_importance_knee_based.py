@@ -278,7 +278,6 @@ eid_mean_sign = eid_sum_sign / cnt_safe  # [N_ID, F]
 
 def group_mean(eid_idx_tensor):
     """Return (mean_magnitude, mean_signed) for a given group of subject indices."""
-    # Convert numpy array → torch tensor if necessary
     if isinstance(eid_idx_tensor, np.ndarray):
         eid_idx_tensor = torch.tensor(eid_idx_tensor, dtype=torch.long)
     elif not isinstance(eid_idx_tensor, torch.Tensor):
@@ -299,6 +298,7 @@ group_mean_mag = {}
 group_mean_sign = {}
 group_mean_mag_std = {}
 group_mean_sign_std = {}
+
 for name, g_idx in {
     "all": g_all,
     "correct": g_correct,
@@ -389,11 +389,9 @@ with open(summary_txt_path, "w") as f_txt:
         if knee_rank is not None and knee_rank <= max_raw:
             k = int(knee_rank)
 
-            ax1.axvline(k, linestyle='--',
-                        color=knee_color, alpha=knee_alpha)
-            # knee point
-            ax1.scatter([k], [sorted_imp[k - 1]],
-                        s=40, color=knee_color, alpha=knee_alpha)
+            ax1.axvline(k, linestyle='--', color=knee_color, alpha=knee_alpha)
+            # knee
+            ax1.scatter([k], [sorted_imp[k - 1]], s=40, color=knee_color, alpha=knee_alpha)
 
             xticks = list(ax1.get_xticks())
             if k not in xticks:
@@ -459,8 +457,8 @@ with open(summary_txt_path, "w") as f_txt:
         selected_vals = sorted_imp[:n]
 
         for rank in range(n):
-            global_idx = top_n_indices[rank]  # 0 ~ F-1
-            fname = feature_names[global_idx]        # 원래 이름
+            global_idx = top_n_indices[rank]   # 0 ~ F-1
+            fname = feature_names[global_idx]  # original name
 
             imp_mean_val = imp[global_idx].item()
             imp_std_val  = imp_std[global_idx].item()
