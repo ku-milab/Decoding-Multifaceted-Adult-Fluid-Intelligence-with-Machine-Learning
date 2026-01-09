@@ -4,8 +4,8 @@ defaults:
   - optimizer: adamw
   - training: default
 
-pretrained_model: /LocalData2/daheo/UKB_FINAL/results/DL_based/FTTransformer_251116_ep_100_bs_256
-save_path: /LocalData2/daheo/UKB_FINAL/results/DL_based/FTTransformer_251116_ep_100_bs_256/${dataset.variable_type}/Interpret
+pretrained_model: ./results/DL_based/FTTransformer_ep_100_bs_256
+save_path: ./results/DL_based/FTTransformer_ep_100_bs_256/${dataset.variable_type}/Interpret
 
 gpu: 3
 test: true
