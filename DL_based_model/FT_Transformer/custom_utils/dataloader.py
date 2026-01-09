@@ -300,7 +300,7 @@ def build_dataloaders(cfg: DictConfig, fold: int) -> Dict[str, Any]:
     it = cfg.dataset.iteration
     itfold = ids["iterations"][it]["folds"][fold]
     train_val_eids = itfold["train_eid"]
-    test_eids = itfold["valid_eid"]
+    test_eids = itfold["test_eid"]
 
     # Load dataset
     df = pd.read_csv(cfg.dataset.data_path)
