@@ -6,12 +6,11 @@ Da-Woon Heo†, Eunjae Kim†, Sohyun Kang, Joon-Kyung Seong, Chi-Hun Kim, Heung
 *Decoding Multifaceted Cognitive Performance with Machine Learning:  
 Juxtaposing Social, Health-related, and Brain Factors using UK Biobank*
 
-† Equal contribution  
-* Corresponding authors
+† Equal contribution; * Corresponding authors
 
 (Manuscript submitted)
 
-The repository provides the full pipeline used in the study, including data preprocessing, feature construction, model training, evaluation, and feature attribution analyses.
+This repository provides the full pipeline used in the study, including data preprocessing, feature construction, model training, evaluation, and feature attribution analyses.
 
 ---
 # Repository Structure
